@@ -1,0 +1,42 @@
+services:
+  mongodb:
+    image: mongo:7.0.34
+    container_name: bench_mongo
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: twitch
+    volumes:
+      - mongo_data:/data/db
+
+  cassandra:
+    image: cassandra:5.0.8
+    container_name: bench_cassandra
+    ports:
+      - "9042:9042"
+    environment:
+      - CASSANDRA_CLUSTER_NAME=BenchCluster
+    volumes:
+      - cassandra_data:/var/lib/cassandra
+    healthcheck:
+      test: ["CMD", "cqlsh", "-e", "describe keyspaces"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+  
+  neo4j:
+    image: neo4j:5.26.26-community-ubi10
+    container_name: bench_neo4j
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    environment:
+      - NEO4J_AUTH=neo4j/benchmark123
+      - NEO4J_PLUGINS=["apoc","graph-data-science"]
+    volumes:
+      - neo4j_data:/data
+
+volumes:
+  mongo_data:
+  cassandra_data:
+  neo4j_data:
