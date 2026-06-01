@@ -35,8 +35,21 @@ services:
       - NEO4J_PLUGINS=["apoc","graph-data-science"]
     volumes:
       - neo4j_data:/data
+  
+  postgresql:
+    image: postgres:18.4
+    container_name: bench_postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: twitch
+      POSTGRES_USER: benchmark
+      POSTGRES_PASSWORD: benchmark123
+    volumes:
+      - postgres_data:/var/lib/postgresql
 
 volumes:
   mongo_data:
   cassandra_data:
   neo4j_data:
+  postgres_data:
