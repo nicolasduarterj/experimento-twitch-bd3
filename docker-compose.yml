@@ -9,21 +9,6 @@ services:
     volumes:
       - mongo_data:/data/db
 
-  cassandra:
-    image: cassandra:5.0.8
-    container_name: bench_cassandra
-    ports:
-      - "9042:9042"
-    environment:
-      - CASSANDRA_CLUSTER_NAME=BenchCluster
-    volumes:
-      - cassandra_data:/var/lib/cassandra
-    healthcheck:
-      test: ["CMD", "cqlsh", "-e", "describe keyspaces"]
-      interval: 30s
-      timeout: 10s
-      retries: 10
-  
   neo4j:
     image: neo4j:5.26.26-community-ubi10
     container_name: bench_neo4j
@@ -48,8 +33,25 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql
 
+  scylladb:
+    image: scylladb/scylla:5.4
+    container_name: bench_scylla
+    ports:
+      - "9042:9042"
+      - "9160:9160"
+    # --smp controls how many cores ScyllaDB uses; match to available CPUs
+    # --memory caps RAM usage; --overprovisioned suits a shared benchmark host
+    command: --smp 20 --overprovisioned 1 --rpc-address 0.0.0.0 --broadcast-rpc-address 127.0.0.1
+    volumes:
+      - scylla_data:/var/lib/scylla
+    healthcheck:
+      test: ["CMD-SHELL", "nodetool status | grep -q UN"]
+      interval: 30s
+      timeout: 15s
+      retries: 12
+
 volumes:
   mongo_data:
-  cassandra_data:
   neo4j_data:
   postgres_data:
+  scylla_data:
