@@ -40,6 +40,10 @@ def ingest_scylladb():
         numeric_id INT PRIMARY KEY, views BIGINT, mature BOOLEAN,
         life_time INT, created_at TEXT, updated_at TEXT,
         dead_account BOOLEAN, language TEXT, affiliate BOOLEAN)""", timeout=120)
+    
+    session.execute("""CREATE TABLE IF NOT EXISTS users_by_language (
+        language TEXT, numeric_id INT, views BIGINT, affiliate BOOLEAN,
+        life_time INT, PRIMARY KEY (language, numeric_id))""", timeout=120)
 
     session.execute("""CREATE TABLE IF NOT EXISTS adjacency (
         src_id INT, dst_id INT, PRIMARY KEY (src_id, dst_id))""", timeout=120)
@@ -59,6 +63,9 @@ def ingest_scylladb():
         "INSERT INTO users (views, mature, life_time, created_at, "
         "updated_at, numeric_id, dead_account, language, affiliate) VALUES (?,?,?,?,?,?,?,?,?)"
     )
+    insert_by_lang = session.prepare(
+        "INSERT INTO users_by_language (language,numeric_id,views,affiliate,"
+        "life_time) VALUES (?,?,?,?,?)")
     col_order = ["views", "mature", "life_time", "created_at",
                  "updated_at", "numeric_id", "dead_account", "language", "affiliate"]
     rows = features[col_order].values.tolist()
@@ -69,6 +76,9 @@ def ingest_scylladb():
         execute_concurrent_with_args(
             session, insert_user, rows[i:i + BATCH_SIZE], concurrency=CONCURRENCY
         )
+        lang_batch = [(r[7], r[5], r[0], r[8], r[2]) for r in rows[i:i+BATCH_SIZE]]
+        execute_concurrent_with_args(session, insert_by_lang, lang_batch,
+                                     concurrency=50)
 
     # FIX 3: same concurrency for edges
     insert_edges = session.prepare("INSERT INTO adjacency (src_id, dst_id) VALUES (?,?)")
