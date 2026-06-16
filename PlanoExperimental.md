@@ -1,4 +1,4 @@
-# Benchmark de databases não convencionais em uma base de dados em grafo
+# Benchmark de databases não convencionais em uma base de dados em grafo (OLTP)
 
 O dataset [Twitch Gamers Social Network](https://snap.stanford.edu/data/twitch_gamers.html) é composto por nós que representam perfis na plataforma de streaming Twitch e arestas que implicam que os canais conectados seguem um ao outro. Isto posto, qual sistema de gerenciamento de banco de dados (SGBD) será mais eficiente em processar esses dados?
 Para determinar a resposta dessa questão empregaremos quatro SGBDs: PostgreSQL, Neo4J, Cassandra e MongoDB. A nossa hipótese é que o Neo4J, por ser um database de grafos, será mais veloz e mais capaz que os outros.
@@ -73,3 +73,52 @@ Banco de dados (Tempo médio +/- desvio-padrão) (em ms)
     2. Neo4J (1.93 +/- 0.39)
     3. MongoDB (851.86 +/- 10.8)
     4. ScyllaDB (não foi capaz)
+
+# Benchmark de bancos de dados OLAP em uma base de dados de corridas de táxi
+
+O dataset [TLC Yellow Taxi Trip Records](https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page) é composto por registros de corridas de táxi amarelo na cidade de Nova York, contendo informações como localização de embarque e desembarque, distância percorrida, valores tarifários, gorjetas, taxas e forma de pagamento. Diante disso, qual sistema de gerenciamento de banco de dados OLAP será mais eficiente em processar consultas analíticas sobre esses dados?
+Para isso foi realizado a comparação entre três bancos de dados, são eles: DuckDB, ClickHouse e ElasticSearch.
+
+## Observações
+
+A virtualização Docker pode interferir nos resultados do ClickHouse e do ElasticSearch, enquanto o DuckDB, por rodar diretamente no host, não sofre esse overhead. Por fim, o tamanho e a distribuição dos dados dentro de cada arquivo Parquet pode influenciar o comportamento do otimizador de cada banco.
+
+## Ingestão de dados
+
+O dataset foi inserido nos bancos usando os scripts na pasta `ingestion/`. Os dados utilizados correspondem ao mês de abril de 2026 do dataset Yellow Taxi Trip Records, totalizando 3.831.240 registros. A ingestão foi realizada a partir de arquivos no formato Parquet e inseridos em cada banco por meio de seus respectivos clientes Python.
+
+## Consultas
+
+Organizamos quatro consultas analíticas representativas de cenários reais de análise de transporte urbano:
+
+- **PEAK_DEMAND:** Identificar os horários de pico de demanda, agrupando o volume de viagens por hora e dia da semana.
+- **AIRPORT_DYNAMICS:** Analisar o comportamento de corridas com origem ou destino em aeroportos (JFK e LaGuardia), comparando tarifa média, distância e gorjeta em relação às demais corridas.
+- **TIPPING_BEHAVIOR:** Entender o comportamento das gorjetas em pagamentos no cartão, relacionando o valor médio e percentual à quantidade de passageiros.
+- **ROUTE_PROFITABILITY:** Descobrir as três rotas mais lucrativas por milha rodada para cada zona de origem, baseando-se na receita líquida de trajetos com alta frequência.
+
+Rodamos cada consulta dez vezes em cada banco de dados, medindo o tempo médio de cada consulta e seu desvio-padrão nas 10 execuções.
+
+## Resultados
+
+Por consulta:
+Banco de dados (Tempo médio +/- desvio-padrão) (em ms)
+
+1. **PEAK_DEMAND:**
+    1. ClickHouse ( +/- )
+    2. DuckDB ( +/- )
+    3. ElasticSearch ( +/- )
+
+2. **AIRPORT_DYNAMICS:**
+    1. ClickHouse ( +/- )
+    2. DuckDB ( +/- )
+    3. ElasticSearch ( +/- )
+
+3. **TIPPING_BEHAVIOR:**
+    1. ClickHouse ( +/- )
+    2. DuckDB ( +/- )
+    3. ElasticSearch ( +/- )
+
+4. **ROUTE_PROFITABILITY:**
+    1. ClickHouse ( +/- )
+    2. DuckDB ( +/- )
+    3. ElasticSearch ( +/- )
