@@ -31,6 +31,7 @@ Organizamos uma lista de consultas para realizar em cada banco:
 - Retornar todos os vizinhos diretos.
 - Retornar todos os vizinhos de segundo grau
 - Retornar o menor caminho indireto entre dois usuários.
+- Retornar o menor caminho entre dois usuários
 
 Rodamos as consultas dez vezes em cada banco de dados, descartando a primeira por causa do cache vazio.
 Então medimos o tempo médio de cada consulta e seu desvio-padrão.
@@ -73,6 +74,8 @@ Banco de dados (Tempo médio +/- desvio-padrão) (em ms)
     2. Neo4J (1.93 +/- 0.39)
     3. MongoDB (851.86 +/- 10.8)
     4. ScyllaDB (não foi capaz)
+8. Retornar o menor caminho entre dois usuários:
+    1. Neo4J (1.89 +/- 0.25)
 
 # Benchmark de bancos de dados OLAP em uma base de dados de corridas de táxi
 
@@ -104,21 +107,21 @@ Por consulta:
 Banco de dados (Tempo médio +/- desvio-padrão) (em ms)
 
 1. **PEAK_DEMAND:**
-    1. ClickHouse ( +/- )
-    2. DuckDB ( +/- )
-    3. ElasticSearch ( +/- )
+    1. DuckDB (6.15 +/- 0.28)
+    2. ClickHouse (56.83 +/- 6.35)
+    3. ElasticSearch (422.11 +/- 6.6)
 
 2. **AIRPORT_DYNAMICS:**
-    1. ClickHouse ( +/- )
-    2. DuckDB ( +/- )
-    3. ElasticSearch ( +/- )
+    1. DuckDB (3.47 +/- 1.19)
+    2. ElasticSearch (10.78 +/- 2.54)
+    3. ClickHouse (51.31 +/- 1.19)
 
 3. **TIPPING_BEHAVIOR:**
-    1. ClickHouse ( +/- )
-    2. DuckDB ( +/- )
-    3. ElasticSearch ( +/- )
+    1. DuckDB (5.58 +/- 0.31)
+    2. ClickHouse (56.89 +/- 7.13)
+    3. ElasticSearch (62 +/- 2.6)
 
 4. **ROUTE_PROFITABILITY:**
-    1. ClickHouse ( +/- )
-    2. DuckDB ( +/- )
-    3. ElasticSearch ( +/- )
+    1. DuckDB (28.72 +/- 0.79)
+    2. ClickHouse (52.01 +/- 8.95)
+    3. ElasticSearch (930.33 +/- 27.73)
